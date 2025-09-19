@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Loader2, Play, TrendingUp, TrendingDown, Minus } from "lucide-react"
 import { analyzeBatchComments } from "@/lib/sentiment-analysis"
 
 interface Comment {
@@ -40,11 +39,11 @@ export function SentimentAnalyzer({ comments, onAnalysisComplete }: SentimentAna
   const getSentimentIcon = (label: string) => {
     switch (label) {
       case "positive":
-        return <TrendingUp className="w-4 h-4 text-green-600" />
+        return <span className="text-green-600">📈</span>
       case "negative":
-        return <TrendingDown className="w-4 h-4 text-red-600" />
+        return <span className="text-red-600">📉</span>
       default:
-        return <Minus className="w-4 h-4 text-yellow-600" />
+        return <span className="text-yellow-600">➖</span>
     }
   }
 
@@ -74,7 +73,7 @@ export function SentimentAnalyzer({ comments, onAnalysisComplete }: SentimentAna
               disabled={comments.length === 0 || isAnalyzing}
               className="flex items-center gap-2"
             >
-              {isAnalyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+              {isAnalyzing ? <span className="animate-spin">⏳</span> : <span>▶️</span>}
               {isAnalyzing ? "Analyzing..." : "Start Analysis"}
             </Button>
             <div className="text-sm text-muted-foreground">

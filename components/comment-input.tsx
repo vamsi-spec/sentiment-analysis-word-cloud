@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Upload, FileText, X, Plus } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
 interface Comment {
@@ -50,17 +49,54 @@ export function CommentInput({ onCommentsChange }: CommentInputProps) {
     const file = files[0]
     if (!file) return
 
+    console.log("[v0] Processing file:", file.name, "Size:", file.size)
+
     const text = await file.text()
     const newComments: Comment[] = []
 
     if (file.name.endsWith(".csv")) {
-      // Simple CSV parsing - assumes comments are in first column
+      console.log("[v0] Processing CSV file")
       const lines = text.split("\n")
+      const header = lines[0]?.toLowerCase() || ""
+
+      // Try to find comment column by looking for common keywords
+      const headerCols = header.split(",").map((col) => col.trim().replace(/"/g, ""))
+      let commentColIndex = 0
+
+      // Look for comment-related column names
+      const commentKeywords = ["comment", "feedback", "text", "message", "review", "response"]
+      for (let i = 0; i < headerCols.length; i++) {
+        if (commentKeywords.some((keyword) => headerCols[i].includes(keyword))) {
+          commentColIndex = i
+          break
+        }
+      }
+
+      console.log("[v0] Using column index:", commentColIndex, "Header:", headerCols[commentColIndex])
+
       lines.forEach((line, index) => {
         if (line.trim() && index > 0) {
           // Skip header
-          const comment = line.split(",")[0]?.replace(/"/g, "").trim()
-          if (comment) {
+          // Handle CSV with proper quote parsing
+          const cols = []
+          let current = ""
+          let inQuotes = false
+
+          for (let i = 0; i < line.length; i++) {
+            const char = line[i]
+            if (char === '"') {
+              inQuotes = !inQuotes
+            } else if (char === "," && !inQuotes) {
+              cols.push(current.trim())
+              current = ""
+            } else {
+              current += char
+            }
+          }
+          cols.push(current.trim()) // Add last column
+
+          const comment = cols[commentColIndex]?.replace(/^"|"$/g, "").trim()
+          if (comment && comment.length > 0) {
             newComments.push({
               id: `file-${Date.now()}-${index}`,
               text: comment,
@@ -70,6 +106,7 @@ export function CommentInput({ onCommentsChange }: CommentInputProps) {
         }
       })
     } else {
+      console.log("[v0] Processing text file")
       // Plain text - split by lines
       const lines = text.split("\n")
       lines.forEach((line, index) => {
@@ -83,6 +120,7 @@ export function CommentInput({ onCommentsChange }: CommentInputProps) {
       })
     }
 
+    console.log("[v0] Loaded comments:", newComments.length)
     const updatedComments = [...comments, ...newComments]
     setComments(updatedComments)
     onCommentsChange(updatedComments)
@@ -123,16 +161,16 @@ export function CommentInput({ onCommentsChange }: CommentInputProps) {
         <CardContent>
           <div
             className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-              dragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-muted-foreground/50"
+              dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400"
             }`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
             onDrop={handleDrop}
           >
-            <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+            <div className="text-4xl mb-4">📁</div>
             <h3 className="text-lg font-semibold mb-2">Drop files here or click to upload</h3>
-            <p className="text-muted-foreground mb-4">Supports CSV and text files up to 10MB</p>
+            <p className="text-gray-600 mb-4">Supports CSV and text files up to 10MB</p>
             <Input
               type="file"
               accept=".csv,.txt,.text"
@@ -167,7 +205,7 @@ export function CommentInput({ onCommentsChange }: CommentInputProps) {
             />
           </div>
           <Button onClick={addComment} disabled={!newComment.trim()}>
-            <Plus className="w-4 h-4 mr-2" />
+            <span className="mr-2">➕</span>
             Add Comment
           </Button>
         </CardContent>
@@ -190,10 +228,10 @@ export function CommentInput({ onCommentsChange }: CommentInputProps) {
           <CardContent>
             <div className="space-y-3 max-h-96 overflow-y-auto">
               {comments.map((comment) => (
-                <div key={comment.id} className="flex items-start gap-3 p-3 border rounded-lg bg-muted/30">
-                  <FileText className="w-4 h-4 mt-1 text-muted-foreground flex-shrink-0" />
+                <div key={comment.id} className="flex items-start gap-3 p-3 border rounded-lg bg-gray-50">
+                  <span className="text-lg mt-1">📄</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-foreground break-words">{comment.text}</p>
+                    <p className="text-sm break-words">{comment.text}</p>
                     {comment.source && (
                       <Badge variant="secondary" className="mt-2 text-xs">
                         {comment.source}
@@ -201,7 +239,7 @@ export function CommentInput({ onCommentsChange }: CommentInputProps) {
                     )}
                   </div>
                   <Button variant="ghost" size="sm" onClick={() => removeComment(comment.id)} className="flex-shrink-0">
-                    <X className="w-4 h-4" />
+                    <span>❌</span>
                   </Button>
                 </div>
               ))}

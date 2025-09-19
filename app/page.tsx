@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { Upload, BarChart3, MessageSquare, FileText, Download, TrendingUp } from "lucide-react"
 import { CommentInput } from "@/components/comment-input"
 import { SentimentAnalyzer } from "@/components/sentiment-analyzer"
 import { WordCloud } from "@/components/word-cloud"
@@ -52,12 +51,10 @@ export default function SentimentDashboard() {
             </div>
             <div className="flex items-center gap-3">
               <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200">
-                <TrendingUp className="w-3 h-3 mr-1" />
-                Live Analysis
+                📈 Live Analysis
               </Badge>
               <Button variant="outline" size="sm" onClick={handleQuickExport} disabled={!analysisResults}>
-                <Download className="w-4 h-4 mr-2" />
-                Export Report
+                📥 Export Report
               </Button>
             </div>
           </div>
@@ -67,24 +64,34 @@ export default function SentimentDashboard() {
       {/* Main Content */}
       <main className="container mx-auto px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-[600px]">
-            <TabsTrigger value="overview" className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4" />
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="upload" className="flex items-center gap-2">
-              <Upload className="w-4 h-4" />
-              Upload Data
-            </TabsTrigger>
-            <TabsTrigger value="analysis" className="flex items-center gap-2">
-              <MessageSquare className="w-4 h-4" />
-              Analysis
-            </TabsTrigger>
-            <TabsTrigger value="reports" className="flex items-center gap-2">
-              <FileText className="w-4 h-4" />
-              Reports
-            </TabsTrigger>
-          </TabsList>
+          <div className="w-full overflow-x-auto">
+            <TabsList className="inline-flex h-12 items-center justify-start rounded-lg bg-muted p-1 text-muted-foreground min-w-full sm:min-w-0 sm:w-auto">
+              <TabsTrigger
+                value="overview"
+                className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow gap-2 flex-1 sm:flex-initial"
+              >
+                📊 Overview
+              </TabsTrigger>
+              <TabsTrigger
+                value="upload"
+                className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow gap-2 flex-1 sm:flex-initial"
+              >
+                📤 Upload Data
+              </TabsTrigger>
+              <TabsTrigger
+                value="analysis"
+                className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow gap-2 flex-1 sm:flex-initial"
+              >
+                💬 Analysis
+              </TabsTrigger>
+              <TabsTrigger
+                value="reports"
+                className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow gap-2 flex-1 sm:flex-initial"
+              >
+                📄 Reports
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
@@ -152,7 +159,7 @@ export default function SentimentDashboard() {
                     </CardHeader>
                     <CardContent className="h-64 flex items-center justify-center text-muted-foreground">
                       <div className="text-center">
-                        <BarChart3 className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                        <div className="text-4xl mb-3 opacity-50">📊</div>
                         <p>Upload comments to see sentiment trends</p>
                       </div>
                     </CardContent>

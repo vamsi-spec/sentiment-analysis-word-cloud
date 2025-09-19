@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { FileText, TrendingUp, AlertTriangle, Lightbulb, BarChart3 } from "lucide-react"
+// import { FileText, TrendingUp, AlertTriangle, Lightbulb, BarChart3 } from 'lucide-react'
 import { generateSummary } from "@/lib/summary-generator"
 
 interface SummaryReportProps {
@@ -19,7 +19,7 @@ export function SummaryReport({ analysisResults }: SummaryReportProps) {
         </CardHeader>
         <CardContent className="h-96 flex items-center justify-center text-muted-foreground">
           <div className="text-center">
-            <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
+            <div className="text-6xl mb-4 opacity-50">📄</div>
             <p className="text-lg mb-2">No analysis data available</p>
             <p>Complete sentiment analysis to generate summary report</p>
           </div>
@@ -36,7 +36,7 @@ export function SummaryReport({ analysisResults }: SummaryReportProps) {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-blue-600" />
+            <span className="text-xl text-blue-600">📄</span>
             <CardTitle>Executive Summary</CardTitle>
           </div>
           <CardDescription>High-level overview of public consultation results</CardDescription>
@@ -50,7 +50,7 @@ export function SummaryReport({ analysisResults }: SummaryReportProps) {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-green-600" />
+            <span className="text-xl text-green-600">📈</span>
             <CardTitle>Key Findings</CardTitle>
           </div>
           <CardDescription>Primary insights from the sentiment analysis</CardDescription>
@@ -71,7 +71,7 @@ export function SummaryReport({ analysisResults }: SummaryReportProps) {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-purple-600" />
+            <span className="text-xl text-purple-600">📊</span>
             <CardTitle>Sentiment Overview</CardTitle>
           </div>
           <CardDescription>Detailed breakdown of public sentiment patterns</CardDescription>
@@ -100,7 +100,7 @@ export function SummaryReport({ analysisResults }: SummaryReportProps) {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-orange-600" />
+            <span className="text-xl text-orange-600">⚠️</span>
             <CardTitle>Key Concerns</CardTitle>
           </div>
           <CardDescription>Primary issues and concerns raised by respondents</CardDescription>
@@ -109,7 +109,7 @@ export function SummaryReport({ analysisResults }: SummaryReportProps) {
           <ul className="space-y-3">
             {summary.topConcerns.map((concern, index) => (
               <li key={index} className="flex items-start gap-3">
-                <AlertTriangle className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                <span className="text-orange-500 mt-0.5 flex-shrink-0">⚠️</span>
                 <span className="text-foreground">{concern}</span>
               </li>
             ))}
@@ -121,7 +121,7 @@ export function SummaryReport({ analysisResults }: SummaryReportProps) {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Lightbulb className="w-5 h-5 text-yellow-600" />
+            <span className="text-xl text-yellow-600">💡</span>
             <CardTitle>Recommendations</CardTitle>
           </div>
           <CardDescription>Strategic recommendations based on analysis results</CardDescription>
@@ -130,7 +130,7 @@ export function SummaryReport({ analysisResults }: SummaryReportProps) {
           <ul className="space-y-3">
             {summary.recommendations.map((recommendation, index) => (
               <li key={index} className="flex items-start gap-3">
-                <Lightbulb className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+                <span className="text-yellow-500 mt-0.5 flex-shrink-0">💡</span>
                 <span className="text-foreground">{recommendation}</span>
               </li>
             ))}

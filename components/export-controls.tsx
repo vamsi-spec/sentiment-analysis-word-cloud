@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Download, FileText, FileSpreadsheet, Code, Loader2 } from "lucide-react"
+// import { Download, FileText, FileSpreadsheet, Code, Loader2 } from 'lucide-react'
 import { exportToCSV, exportToJSON, exportToMarkdown, downloadFile, generateFilename } from "@/lib/export-utils"
 
 interface ExportControlsProps {
@@ -72,7 +72,7 @@ export function ExportControls({ analysisResults, comments }: ExportControlsProp
         </CardHeader>
         <CardContent className="flex items-center justify-center h-32 text-muted-foreground">
           <div className="text-center">
-            <Download className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <div className="text-4xl mb-2 opacity-50">📥</div>
             <p>Complete analysis to enable exports</p>
           </div>
         </CardContent>
@@ -95,7 +95,7 @@ export function ExportControls({ analysisResults, comments }: ExportControlsProp
             disabled={isExporting}
             className="flex items-center gap-2 h-auto p-4 flex-col"
           >
-            <FileSpreadsheet className="w-6 h-6 text-green-600" />
+            <div className="text-2xl text-green-600">📊</div>
             <div className="text-center">
               <div className="font-medium">CSV Export</div>
               <div className="text-xs text-muted-foreground">Detailed data for analysis</div>
@@ -109,7 +109,7 @@ export function ExportControls({ analysisResults, comments }: ExportControlsProp
             disabled={isExporting}
             className="flex items-center gap-2 h-auto p-4 flex-col"
           >
-            <Code className="w-6 h-6 text-blue-600" />
+            <div className="text-2xl text-blue-600">💻</div>
             <div className="text-center">
               <div className="font-medium">JSON Export</div>
               <div className="text-xs text-muted-foreground">Structured data format</div>
@@ -123,7 +123,7 @@ export function ExportControls({ analysisResults, comments }: ExportControlsProp
             disabled={isExporting}
             className="flex items-center gap-2 h-auto p-4 flex-col"
           >
-            <FileText className="w-6 h-6 text-purple-600" />
+            <div className="text-2xl text-purple-600">📄</div>
             <div className="text-center">
               <div className="font-medium">Report (MD)</div>
               <div className="text-xs text-muted-foreground">Formatted summary report</div>
@@ -137,25 +137,21 @@ export function ExportControls({ analysisResults, comments }: ExportControlsProp
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button disabled={isExporting}>
-                {isExporting ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Download className="w-4 h-4 mr-2" />
-                )}
+                {isExporting ? <span className="mr-2">⏳</span> : <span className="mr-2">📥</span>}
                 {isExporting ? "Exporting..." : "Export"}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => handleExport("csv")}>
-                <FileSpreadsheet className="w-4 h-4 mr-2" />
+                <span className="mr-2">📊</span>
                 Export as CSV
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleExport("json")}>
-                <Code className="w-4 h-4 mr-2" />
+                <span className="mr-2">💻</span>
                 Export as JSON
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleExport("markdown")}>
-                <FileText className="w-4 h-4 mr-2" />
+                <span className="mr-2">📄</span>
                 Export as Markdown
               </DropdownMenuItem>
             </DropdownMenuContent>

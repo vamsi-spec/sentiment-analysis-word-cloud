@@ -1,22 +1,6 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  PieChart,
-  Pie,
-  Cell,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  Area,
-  AreaChart,
-} from "recharts"
 
 interface AnalyticsChartsProps {
   analysisResults: any
@@ -27,7 +11,6 @@ export function AnalyticsCharts({ analysisResults }: AnalyticsChartsProps) {
     return null
   }
 
-  // Prepare data for charts
   const sentimentData = [
     {
       name: "Positive",
@@ -49,167 +32,64 @@ export function AnalyticsCharts({ analysisResults }: AnalyticsChartsProps) {
     },
   ]
 
-  // Top keywords for bar chart
-  const keywordData = analysisResults.keywords.slice(0, 10).map((keyword: any) => ({
-    word: keyword.word,
-    count: keyword.count,
-  }))
-
-  // Sentiment distribution over comment index (simulating time series)
-  const sentimentTrendData = analysisResults.results.map((result: any, index: number) => ({
-    index: index + 1,
-    score: result.analysis.sentiment.score,
-    sentiment: result.analysis.sentiment.label,
-  }))
-
-  // Word count distribution
-  const wordCountData = analysisResults.results.reduce((acc: any, result: any) => {
-    const range = Math.floor(result.analysis.wordCount / 10) * 10
-    const key = `${range}-${range + 9}`
-    acc[key] = (acc[key] || 0) + 1
-    return acc
-  }, {})
-
-  const wordCountChartData = Object.entries(wordCountData).map(([range, count]) => ({
-    range,
-    count,
-  }))
-
-  // Confidence distribution
-  const confidenceData = analysisResults.results.reduce((acc: any, result: any) => {
-    const confidence = Math.floor(result.analysis.sentiment.confidence * 10) / 10
-    acc[confidence] = (acc[confidence] || 0) + 1
-    return acc
-  }, {})
-
-  const confidenceChartData = Object.entries(confidenceData)
-    .map(([confidence, count]) => ({
-      confidence: Number.parseFloat(confidence as string),
-      count,
-    }))
-    .sort((a, b) => a.confidence - b.confidence)
-
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Sentiment Distribution Pie Chart */}
+      {/* Sentiment Distribution */}
       <Card>
         <CardHeader>
           <CardTitle>Sentiment Distribution</CardTitle>
           <CardDescription>Overall sentiment breakdown</CardDescription>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={sentimentData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percentage }) => `${name}: ${percentage}%`}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {sentimentData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value: any, name: any) => [`${value} comments`, name]} />
-            </PieChart>
-          </ResponsiveContainer>
+          <div className="space-y-4">
+            {sentimentData.map((item) => (
+              <div key={item.name} className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full" style={{ backgroundColor: item.color }} />
+                  <span className="font-medium">{item.name}</span>
+                </div>
+                <div className="text-right">
+                  <div className="font-bold">{item.value}</div>
+                  <div className="text-sm text-muted-foreground">{item.percentage}%</div>
+                </div>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
 
-      {/* Top Keywords Bar Chart */}
+      {/* Top Keywords */}
       <Card>
         <CardHeader>
           <CardTitle>Top Keywords</CardTitle>
           <CardDescription>Most frequently mentioned words</CardDescription>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={keywordData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="word" angle={-45} textAnchor="end" height={80} fontSize={12} />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="count" fill="#3b82f6" />
-            </BarChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
-
-      {/* Sentiment Trend Line Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Sentiment Trend</CardTitle>
-          <CardDescription>Sentiment scores across comments</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={sentimentTrendData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="index" />
-              <YAxis domain={[-1, 1]} />
-              <Tooltip
-                formatter={(value: any) => [value.toFixed(3), "Sentiment Score"]}
-                labelFormatter={(label) => `Comment ${label}`}
-              />
-              <Line type="monotone" dataKey="score" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 2 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
-
-      {/* Word Count Distribution */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Comment Length Distribution</CardTitle>
-          <CardDescription>Distribution of word counts in comments</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={wordCountChartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="range" />
-              <YAxis />
-              <Tooltip />
-              <Area type="monotone" dataKey="count" stroke="#06b6d4" fill="#06b6d4" fillOpacity={0.6} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
-
-      {/* Confidence Distribution */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Analysis Confidence</CardTitle>
-          <CardDescription>Distribution of sentiment analysis confidence scores</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={confidenceChartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="confidence" tickFormatter={(value) => `${(value * 100).toFixed(0)}%`} />
-              <YAxis />
-              <Tooltip
-                formatter={(value: any) => [`${value} comments`, "Count"]}
-                labelFormatter={(label) => `Confidence: ${(label * 100).toFixed(0)}%`}
-              />
-              <Bar dataKey="count" fill="#84cc16" />
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="space-y-2">
+            {analysisResults.keywords.slice(0, 10).map((keyword: any, index: number) => (
+              <div key={keyword.word} className="flex items-center justify-between">
+                <span className="font-medium">{keyword.word}</span>
+                <div className="flex items-center gap-2">
+                  <div
+                    className="h-2 bg-blue-500 rounded"
+                    style={{ width: `${(keyword.count / analysisResults.keywords[0].count) * 100}px` }}
+                  />
+                  <span className="text-sm text-muted-foreground w-8 text-right">{keyword.count}</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
 
       {/* Summary Statistics */}
-      <Card>
+      <Card className="lg:col-span-2">
         <CardHeader>
           <CardTitle>Analysis Statistics</CardTitle>
           <CardDescription>Key metrics and statistics</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-blue-50 rounded-lg">
               <div className="text-2xl font-bold text-blue-700">{analysisResults.summary.total}</div>
               <div className="text-sm text-blue-600">Total Comments</div>
