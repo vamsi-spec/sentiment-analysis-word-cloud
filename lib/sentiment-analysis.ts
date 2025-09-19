@@ -197,21 +197,41 @@ export function analyzeSentiment(text: string): AnalysisResult {
     }
   })
 
-  // Calculate sentiment score
   const totalSentimentWords = positiveCount + negativeCount
   let score = 0
   let confidence = 0
 
   if (totalSentimentWords > 0) {
     score = (positiveCount - negativeCount) / totalSentimentWords
-    confidence = Math.min((totalSentimentWords / words.length) * 2, 1) // Normalize confidence
+    confidence = Math.min((totalSentimentWords / words.length) * 2, 1)
+  } else if (words.length > 0) {
+    // If no sentiment words found, check for context clues
+    const contextPositive = ["yes", "ok", "okay", "fine", "sure", "right", "correct", "true", "well"]
+    const contextNegative = ["no", "not", "never", "none", "nothing", "wrong", "false", "stop"]
+
+    let contextPos = 0
+    let contextNeg = 0
+
+    words.forEach((word) => {
+      if (contextPositive.includes(word)) contextPos++
+      if (contextNegative.includes(word)) contextNeg++
+    })
+
+    if (contextPos > contextNeg) {
+      score = 0.3
+      confidence = 0.4
+    } else if (contextNeg > contextPos) {
+      score = -0.3
+      confidence = 0.4
+    }
   }
 
-  // Determine label
   let label: "positive" | "negative" | "neutral"
-  if (score > 0.1) {
+  if (score > 0.05) {
+    // Lowered from 0.1
     label = "positive"
-  } else if (score < -0.1) {
+  } else if (score < -0.05) {
+    // Lowered from -0.1
     label = "negative"
   } else {
     label = "neutral"

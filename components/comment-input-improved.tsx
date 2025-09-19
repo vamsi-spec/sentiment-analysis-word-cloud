@@ -5,6 +5,7 @@ import { useState, useCallback, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
+// Removed the import of Input since we won't use it here
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 
@@ -169,6 +170,8 @@ export function CommentInput({ onCommentsChange }: CommentInputProps) {
             <div className="text-4xl mb-4">📁</div>
             <h3 className="text-lg font-semibold mb-2">Drop files here or click to upload</h3>
             <p className="text-gray-600 mb-4">Supports CSV and text files up to 10MB</p>
+
+            {/* Hidden Native File Input */}
             <input
               type="file"
               accept=".csv,.txt,.text"
@@ -183,6 +186,8 @@ export function CommentInput({ onCommentsChange }: CommentInputProps) {
               }}
               style={{ display: "none" }}
             />
+
+            {/* Click to trigger file input */}
             <Button
               type="button"
               variant="outline"
