@@ -1,6 +1,7 @@
 import { generateObject } from "ai"
 import { openai } from "@ai-sdk/openai"
 import { z } from "zod"
+import Sentiment from "sentiment"
 
 interface SentimentResult {
   score: number // -1 to 1 (negative to positive)
@@ -25,7 +26,14 @@ const sentimentSchema = z.object({
   reasoning: z.string().optional(),
 })
 
+const sentimentAnalyzer = new Sentiment()
+
 export async function analyzeSentiment(text: string): Promise<AnalysisResult> {
+  if (!process.env.OPENAI_API_KEY) {
+    console.log("[v0] OpenAI API key not found, using fallback sentiment analysis")
+    return fallbackAnalysis(text)
+  }
+
   try {
     const { object } = await generateObject({
       model: openai("gpt-4o-mini"),
@@ -53,26 +61,93 @@ Be nuanced - not everything is neutral. Look for subtle emotional indicators, co
     }
   } catch (error) {
     console.error("OpenAI sentiment analysis failed:", error)
-
     return fallbackAnalysis(text)
   }
 }
 
 function fallbackAnalysis(text: string): AnalysisResult {
+  const result = sentimentAnalyzer.analyze(text)
   const words = text.toLowerCase().split(/\s+/)
   const wordCount = words.length
 
-  // Simple keyword extraction
+  // Extract meaningful keywords (filter out common stop words)
+  const stopWords = new Set([
+    "the",
+    "a",
+    "an",
+    "and",
+    "or",
+    "but",
+    "in",
+    "on",
+    "at",
+    "to",
+    "for",
+    "of",
+    "with",
+    "by",
+    "is",
+    "are",
+    "was",
+    "were",
+    "be",
+    "been",
+    "have",
+    "has",
+    "had",
+    "do",
+    "does",
+    "did",
+    "will",
+    "would",
+    "could",
+    "should",
+    "may",
+    "might",
+    "must",
+    "can",
+    "this",
+    "that",
+    "these",
+    "those",
+    "i",
+    "you",
+    "he",
+    "she",
+    "it",
+    "we",
+    "they",
+    "me",
+    "him",
+    "her",
+    "us",
+    "them",
+  ])
+
   const keywords = words
-    .filter((word) => word.length > 3)
+    .filter((word) => word.length > 2 && !stopWords.has(word))
     .filter((word, index, arr) => arr.indexOf(word) === index)
     .slice(0, 10)
 
+  // Convert sentiment score to our scale and determine label
+  const normalizedScore = Math.max(-1, Math.min(1, result.score / 5)) // Normalize to -1 to 1
+  let label: "positive" | "negative" | "neutral"
+
+  if (normalizedScore > 0.1) {
+    label = "positive"
+  } else if (normalizedScore < -0.1) {
+    label = "negative"
+  } else {
+    label = "neutral"
+  }
+
+  const confidence = Math.min(0.9, Math.abs(normalizedScore) + 0.3) // Base confidence with sentiment strength
+
   return {
     sentiment: {
-      score: 0,
-      label: "neutral",
-      confidence: 0.3,
+      score: normalizedScore,
+      label,
+      confidence,
     },
     keywords,
     wordCount,
