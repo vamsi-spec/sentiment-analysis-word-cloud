@@ -1,6 +1,8 @@
 // Simple sentiment analysis using keyword-based approach
 // In production, you would use a more sophisticated ML model or API
 
+import Sentiment from "sentiment"
+
 interface SentimentResult {
   score: number // -1 to 1 (negative to positive)
   label: "positive" | "negative" | "neutral"
@@ -13,98 +15,7 @@ interface AnalysisResult {
   wordCount: number
 }
 
-// Positive and negative word lists for basic sentiment analysis
-const positiveWords = [
-  "good",
-  "great",
-  "excellent",
-  "amazing",
-  "wonderful",
-  "fantastic",
-  "awesome",
-  "brilliant",
-  "outstanding",
-  "superb",
-  "perfect",
-  "love",
-  "like",
-  "enjoy",
-  "happy",
-  "pleased",
-  "satisfied",
-  "delighted",
-  "thrilled",
-  "impressed",
-  "support",
-  "agree",
-  "approve",
-  "recommend",
-  "beneficial",
-  "helpful",
-  "useful",
-  "valuable",
-  "important",
-  "necessary",
-  "effective",
-  "efficient",
-  "successful",
-  "positive",
-  "optimistic",
-  "hopeful",
-  "encouraging",
-  "inspiring",
-  "motivating",
-  "uplifting",
-]
-
-const negativeWords = [
-  "bad",
-  "terrible",
-  "awful",
-  "horrible",
-  "disgusting",
-  "hate",
-  "dislike",
-  "angry",
-  "frustrated",
-  "disappointed",
-  "upset",
-  "annoyed",
-  "irritated",
-  "concerned",
-  "worried",
-  "anxious",
-  "scared",
-  "afraid",
-  "disagree",
-  "oppose",
-  "reject",
-  "refuse",
-  "deny",
-  "criticize",
-  "complain",
-  "problem",
-  "issue",
-  "difficulty",
-  "trouble",
-  "challenge",
-  "obstacle",
-  "barrier",
-  "failure",
-  "mistake",
-  "error",
-  "wrong",
-  "incorrect",
-  "inappropriate",
-  "unacceptable",
-  "unfair",
-  "unjust",
-  "negative",
-  "pessimistic",
-  "discouraging",
-  "demotivating",
-  "depressing",
-]
+const sentiment = new Sentiment()
 
 // Common stop words to filter out
 const stopWords = new Set([
@@ -181,61 +92,24 @@ const stopWords = new Set([
 ])
 
 export function analyzeSentiment(text: string): AnalysisResult {
-  // Clean and tokenize text
+  const result = sentiment.analyze(text)
+
+  // Clean and tokenize text for keywords
   const cleanText = text.toLowerCase().replace(/[^\w\s]/g, " ")
   const words = cleanText.split(/\s+/).filter((word) => word.length > 2 && !stopWords.has(word))
 
-  // Count positive and negative words
-  let positiveCount = 0
-  let negativeCount = 0
-
-  words.forEach((word) => {
-    if (positiveWords.includes(word)) {
-      positiveCount++
-    } else if (negativeWords.includes(word)) {
-      negativeCount++
-    }
-  })
-
-  const totalSentimentWords = positiveCount + negativeCount
-  let score = 0
-  let confidence = 0
-
-  if (totalSentimentWords > 0) {
-    score = (positiveCount - negativeCount) / totalSentimentWords
-    confidence = Math.min((totalSentimentWords / words.length) * 2, 1)
-  } else if (words.length > 0) {
-    // If no sentiment words found, check for context clues
-    const contextPositive = ["yes", "ok", "okay", "fine", "sure", "right", "correct", "true", "well"]
-    const contextNegative = ["no", "not", "never", "none", "nothing", "wrong", "false", "stop"]
-
-    let contextPos = 0
-    let contextNeg = 0
-
-    words.forEach((word) => {
-      if (contextPositive.includes(word)) contextPos++
-      if (contextNegative.includes(word)) contextNeg++
-    })
-
-    if (contextPos > contextNeg) {
-      score = 0.3
-      confidence = 0.4
-    } else if (contextNeg > contextPos) {
-      score = -0.3
-      confidence = 0.4
-    }
-  }
+  const normalizedScore = Math.max(-1, Math.min(1, result.score / 10))
 
   let label: "positive" | "negative" | "neutral"
-  if (score > 0.05) {
-    // Lowered from 0.1
+  if (result.comparative > 0.1) {
     label = "positive"
-  } else if (score < -0.05) {
-    // Lowered from -0.1
+  } else if (result.comparative < -0.1) {
     label = "negative"
   } else {
     label = "neutral"
   }
+
+  const confidence = Math.min((result.words.length / words.length) * 2, 1)
 
   // Extract keywords (most frequent non-stop words)
   const wordFreq: { [key: string]: number } = {}
@@ -250,7 +124,7 @@ export function analyzeSentiment(text: string): AnalysisResult {
 
   return {
     sentiment: {
-      score,
+      score: normalizedScore,
       label,
       confidence,
     },
