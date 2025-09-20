@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { analyzeBatchComments } from "@/lib/sentiment-analysis"
+import { analyzeBatchCommentsAction } from "@/lib/actions"
 
 interface Comment {
   id: string
@@ -27,13 +27,15 @@ export function SentimentAnalyzer({ comments, onAnalysisComplete }: SentimentAna
 
     setIsAnalyzing(true)
 
-    // Simulate processing time for better UX
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-
-    const results = analyzeBatchComments(comments)
-    setAnalysisResults(results)
-    onAnalysisComplete(results)
-    setIsAnalyzing(false)
+    try {
+      const results = await analyzeBatchCommentsAction(comments)
+      setAnalysisResults(results)
+      onAnalysisComplete(results)
+    } catch (error) {
+      console.error("Analysis failed:", error)
+    } finally {
+      setIsAnalyzing(false)
+    }
   }
 
   const getSentimentIcon = (label: string) => {
