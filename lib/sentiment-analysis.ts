@@ -2,6 +2,7 @@ import { generateObject } from "ai"
 import { openai } from "@ai-sdk/openai"
 import { z } from "zod"
 import Sentiment from "sentiment"
+import { removeStopwords, eng } from "stopword"
 
 interface SentimentResult {
   score: number // -1 to 1 (negative to positive)
@@ -70,62 +71,11 @@ function fallbackAnalysis(text: string): AnalysisResult {
   const words = text.toLowerCase().split(/\s+/)
   const wordCount = words.length
 
-  // Extract meaningful keywords (filter out common stop words)
-  const stopWords = new Set([
-    "the",
-    "a",
-    "an",
-    "and",
-    "or",
-    "but",
-    "in",
-    "on",
-    "at",
-    "to",
-    "for",
-    "of",
-    "with",
-    "by",
-    "is",
-    "are",
-    "was",
-    "were",
-    "be",
-    "been",
-    "have",
-    "has",
-    "had",
-    "do",
-    "does",
-    "did",
-    "will",
-    "would",
-    "could",
-    "should",
-    "may",
-    "might",
-    "must",
-    "can",
-    "this",
-    "that",
-    "these",
-    "those",
-    "i",
-    "you",
-    "he",
-    "she",
-    "it",
-    "we",
-    "they",
-    "me",
-    "him",
-    "her",
-    "us",
-    "them",
-  ])
+  // Extract meaningful keywords using stopword library
+  const cleanWords = removeStopwords(words, eng)
 
-  const keywords = words
-    .filter((word) => word.length > 2 && !stopWords.has(word))
+  const keywords = cleanWords
+    .filter((word) => word.length > 2)
     .filter((word, index, arr) => arr.indexOf(word) === index)
     .slice(0, 10)
 
