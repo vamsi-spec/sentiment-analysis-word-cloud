@@ -1,6 +1,3 @@
-import { generateObject } from "ai"
-import { openai } from "@ai-sdk/openai"
-import { z } from "zod"
 import Sentiment from "sentiment"
 import { removeStopwords, eng } from "stopword"
 
@@ -16,57 +13,9 @@ interface AnalysisResult {
   wordCount: number
 }
 
-// Schema for OpenAI response
-const sentimentSchema = z.object({
-  sentiment: z.object({
-    label: z.enum(["positive", "negative", "neutral"]),
-    score: z.number().min(-1).max(1),
-    confidence: z.number().min(0).max(1),
-  }),
-  keywords: z.array(z.string()).max(10),
-  reasoning: z.string().optional(),
-})
-
 const sentimentAnalyzer = new Sentiment()
 
 export async function analyzeSentiment(text: string): Promise<AnalysisResult> {
-  if (!process.env.OPENAI_API_KEY) {
-    console.log("[v0] OpenAI API key not found, using fallback sentiment analysis")
-    return fallbackAnalysis(text)
-  }
-
-  try {
-    const { object } = await generateObject({
-      model: openai("gpt-4o-mini"),
-      schema: sentimentSchema,
-      prompt: `Analyze the sentiment of this text and extract key meaningful words (not stop words):
-
-Text: "${text}"
-
-Provide:
-1. Sentiment label (positive, negative, or neutral)
-2. Score from -1 (very negative) to 1 (very positive)
-3. Confidence level (0-1) based on how clear the sentiment is
-4. Up to 10 keywords/phrases that are most meaningful in this text
-5. Brief reasoning for the sentiment classification
-
-Be nuanced - not everything is neutral. Look for subtle emotional indicators, context, and implied sentiment.`,
-    })
-
-    const wordCount = text.split(/\s+/).filter((word) => word.length > 0).length
-
-    return {
-      sentiment: object.sentiment,
-      keywords: object.keywords,
-      wordCount,
-    }
-  } catch (error) {
-    console.error("OpenAI sentiment analysis failed:", error)
-    return fallbackAnalysis(text)
-  }
-}
-
-function fallbackAnalysis(text: string): AnalysisResult {
   const result = sentimentAnalyzer.analyze(text)
   const words = text.toLowerCase().split(/\s+/)
   const wordCount = words.length
