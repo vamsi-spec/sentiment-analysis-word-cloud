@@ -11,10 +11,8 @@ const nextConfig = {
   },
   experimental: {
     serverComponentsExternalPackages: [],
-  },
-  api: {
-    bodyParser: {
-      sizeLimit: '10mb',
+    serverActions: {
+      bodySizeLimit: '10mb',
     },
   },
 }
