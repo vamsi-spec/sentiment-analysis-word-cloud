@@ -54,73 +54,86 @@ export function CommentInput({ onCommentsChange }: CommentInputProps) {
 
     console.log("[file] Selected file:", file.name, "Size:", file.size)
 
-    const text = await file.text()
-    const newComments: Comment[] = []
+    const maxSize = 10 * 1024 * 1024 // 10MB in bytes
+    if (file.size > maxSize) {
+      alert(
+        `File size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds the 10MB limit. Please choose a smaller file.`,
+      )
+      return
+    }
 
-    if (file.name.endsWith(".csv")) {
-      console.log("[file] Processing as CSV")
-      const lines = text.split("\n")
-      const header = lines[0]?.toLowerCase() || ""
-      const headerCols = header.split(",").map((col) => col.trim().replace(/"/g, ""))
-      let commentColIndex = 0
+    try {
+      const text = await file.text()
+      const newComments: Comment[] = []
 
-      const commentKeywords = ["comment", "feedback", "text", "message", "review", "response"]
-      for (let i = 0; i < headerCols.length; i++) {
-        if (commentKeywords.some((keyword) => headerCols[i].includes(keyword))) {
-          commentColIndex = i
-          break
+      if (file.name.endsWith(".csv")) {
+        console.log("[file] Processing as CSV")
+        const lines = text.split("\n")
+        const header = lines[0]?.toLowerCase() || ""
+        const headerCols = header.split(",").map((col) => col.trim().replace(/"/g, ""))
+        let commentColIndex = 0
+
+        const commentKeywords = ["comment", "feedback", "text", "message", "review", "response"]
+        for (let i = 0; i < headerCols.length; i++) {
+          if (commentKeywords.some((keyword) => headerCols[i].includes(keyword))) {
+            commentColIndex = i
+            break
+          }
         }
-      }
 
-      console.log("[file] Using column index:", commentColIndex, "Header:", headerCols[commentColIndex])
+        console.log("[file] Using column index:", commentColIndex, "Header:", headerCols[commentColIndex])
 
-      lines.forEach((line, index) => {
-        if (line.trim() && index > 0) {
-          const cols = []
-          let current = ""
-          let inQuotes = false
+        lines.forEach((line, index) => {
+          if (line.trim() && index > 0) {
+            const cols = []
+            let current = ""
+            let inQuotes = false
 
-          for (let i = 0; i < line.length; i++) {
-            const char = line[i]
-            if (char === '"') {
-              inQuotes = !inQuotes
-            } else if (char === "," && !inQuotes) {
-              cols.push(current.trim())
-              current = ""
-            } else {
-              current += char
+            for (let i = 0; i < line.length; i++) {
+              const char = line[i]
+              if (char === '"') {
+                inQuotes = !inQuotes
+              } else if (char === "," && !inQuotes) {
+                cols.push(current.trim())
+                current = ""
+              } else {
+                current += char
+              }
+            }
+            cols.push(current.trim())
+
+            const comment = cols[commentColIndex]?.replace(/^"|"$/g, "").trim()
+            if (comment) {
+              newComments.push({
+                id: `file-${Date.now()}-${index}`,
+                text: comment,
+                source: file.name,
+              })
             }
           }
-          cols.push(current.trim())
-
-          const comment = cols[commentColIndex]?.replace(/^"|"$/g, "").trim()
-          if (comment) {
+        })
+      } else {
+        console.log("[file] Processing as plain text")
+        const lines = text.split("\n")
+        lines.forEach((line, index) => {
+          if (line.trim()) {
             newComments.push({
               id: `file-${Date.now()}-${index}`,
-              text: comment,
+              text: line.trim(),
               source: file.name,
             })
           }
-        }
-      })
-    } else {
-      console.log("[file] Processing as plain text")
-      const lines = text.split("\n")
-      lines.forEach((line, index) => {
-        if (line.trim()) {
-          newComments.push({
-            id: `file-${Date.now()}-${index}`,
-            text: line.trim(),
-            source: file.name,
-          })
-        }
-      })
-    }
+        })
+      }
 
-    console.log("[file] Loaded comments:", newComments.length)
-    const updatedComments = [...comments, ...newComments]
-    setComments(updatedComments)
-    onCommentsChange(updatedComments)
+      console.log("[file] Loaded comments:", newComments.length)
+      const updatedComments = [...comments, ...newComments]
+      setComments(updatedComments)
+      onCommentsChange(updatedComments)
+    } catch (error) {
+      console.error("[file] Error reading file:", error)
+      alert("An error occurred while reading the file. Please try again.")
+    }
   }
 
   const addComment = () => {
