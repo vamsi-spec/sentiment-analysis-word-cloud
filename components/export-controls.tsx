@@ -1,74 +1,94 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-// import { Download, FileText, FileSpreadsheet, Code, Loader2 } from 'lucide-react'
-import { exportToCSV, exportToJSON, exportToMarkdown, downloadFile, generateFilename } from "@/lib/export-utils"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  exportToCSV,
+  exportToJSON,
+  exportToMarkdown,
+  downloadFile,
+  generateFilename,
+} from "@/lib/export-utils";
 
 interface ExportControlsProps {
-  analysisResults: any
-  comments: Array<{ id: string; text: string; source?: string }>
+  analysisResults: any;
+  comments: Array<{ id: string; text: string; source?: string }>;
 }
 
-export function ExportControls({ analysisResults, comments }: ExportControlsProps) {
-  const [isExporting, setIsExporting] = useState(false)
+export function ExportControls({
+  analysisResults,
+  comments,
+}: ExportControlsProps) {
+  const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = async (format: "csv" | "json" | "markdown") => {
-    if (!analysisResults) return
+    if (!analysisResults) return;
 
-    setIsExporting(true)
+    setIsExporting(true);
 
     try {
-      const timestamp = new Date().toISOString()
+      const timestamp = new Date().toISOString();
       const exportData = {
         analysisResults,
         comments,
         timestamp,
-      }
+      };
 
-      let content: string
-      let mimeType: string
-      let filename: string
+      let content: string;
+      let mimeType: string;
+      let filename: string;
 
       switch (format) {
         case "csv":
-          content = exportToCSV(exportData)
-          mimeType = "text/csv"
-          filename = generateFilename("csv")
-          break
+          content = exportToCSV(exportData);
+          mimeType = "text/csv";
+          filename = generateFilename("csv");
+          break;
         case "json":
-          content = exportToJSON(exportData)
-          mimeType = "application/json"
-          filename = generateFilename("json")
-          break
+          content = exportToJSON(exportData);
+          mimeType = "application/json";
+          filename = generateFilename("json");
+          break;
         case "markdown":
-          content = exportToMarkdown(exportData)
-          mimeType = "text/markdown"
-          filename = generateFilename("md")
-          break
+          content = exportToMarkdown(exportData);
+          mimeType = "text/markdown";
+          filename = generateFilename("md");
+          break;
         default:
-          throw new Error("Unsupported format")
+          throw new Error("Unsupported format");
       }
 
-      // Simulate processing time for better UX
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      downloadFile(content, filename, mimeType)
+      downloadFile(content, filename, mimeType);
     } catch (error) {
-      console.error("Export failed:", error)
+      console.error("Export failed:", error);
     } finally {
-      setIsExporting(false)
+      setIsExporting(false);
     }
-  }
+  };
 
   if (!analysisResults) {
     return (
       <Card>
         <CardHeader>
           <CardTitle>Export Reports</CardTitle>
-          <CardDescription>Download analysis results in various formats</CardDescription>
+          <CardDescription>
+            Download analysis results in various formats
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-32 text-muted-foreground">
           <div className="text-center">
@@ -77,14 +97,16 @@ export function ExportControls({ analysisResults, comments }: ExportControlsProp
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Export Reports</CardTitle>
-        <CardDescription>Download comprehensive analysis results in your preferred format</CardDescription>
+        <CardDescription>
+          Download comprehensive analysis results in your preferred format
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -98,7 +120,9 @@ export function ExportControls({ analysisResults, comments }: ExportControlsProp
             <div className="text-2xl text-green-600">📊</div>
             <div className="text-center">
               <div className="font-medium">CSV Export</div>
-              <div className="text-xs text-muted-foreground">Detailed data for analysis</div>
+              <div className="text-xs text-muted-foreground">
+                Detailed data for analysis
+              </div>
             </div>
           </Button>
 
@@ -112,7 +136,9 @@ export function ExportControls({ analysisResults, comments }: ExportControlsProp
             <div className="text-2xl text-blue-600">💻</div>
             <div className="text-center">
               <div className="font-medium">JSON Export</div>
-              <div className="text-xs text-muted-foreground">Structured data format</div>
+              <div className="text-xs text-muted-foreground">
+                Structured data format
+              </div>
             </div>
           </Button>
 
@@ -126,18 +152,26 @@ export function ExportControls({ analysisResults, comments }: ExportControlsProp
             <div className="text-2xl text-purple-600">📄</div>
             <div className="text-center">
               <div className="font-medium">Report (MD)</div>
-              <div className="text-xs text-muted-foreground">Formatted summary report</div>
+              <div className="text-xs text-muted-foreground">
+                Formatted summary report
+              </div>
             </div>
           </Button>
         </div>
 
         {/* Quick Export Dropdown */}
         <div className="flex items-center justify-between pt-4 border-t">
-          <div className="text-sm text-muted-foreground">Quick export options</div>
+          <div className="text-sm text-muted-foreground">
+            Quick export options
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button disabled={isExporting}>
-                {isExporting ? <span className="mr-2">⏳</span> : <span className="mr-2">📥</span>}
+                {isExporting ? (
+                  <span className="mr-2">⏳</span>
+                ) : (
+                  <span className="mr-2">📥</span>
+                )}
                 {isExporting ? "Exporting..." : "Export"}
               </Button>
             </DropdownMenuTrigger>
@@ -160,10 +194,11 @@ export function ExportControls({ analysisResults, comments }: ExportControlsProp
 
         {/* Export Info */}
         <div className="text-xs text-muted-foreground bg-muted/30 p-3 rounded-lg">
-          <strong>Export includes:</strong> Complete sentiment analysis results, summary statistics, keyword analysis,
-          individual comment scores, and executive summary with recommendations.
+          <strong>Export includes:</strong> Complete sentiment analysis results,
+          summary statistics, keyword analysis, individual comment scores, and
+          executive summary with recommendations.
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

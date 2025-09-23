@@ -1,153 +1,174 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useCallback, useRef } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-// Removed the import of Input since we won't use it here
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
+import type React from "react";
+import { useState, useCallback, useRef } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 
 interface Comment {
-  id: string
-  text: string
-  source?: string
+  id: string;
+  text: string;
+  source?: string;
 }
 
 interface CommentInputProps {
-  onCommentsChange: (comments: Comment[]) => void
+  onCommentsChange: (comments: Comment[]) => void;
 }
 
 export function CommentInput({ onCommentsChange }: CommentInputProps) {
-  const [comments, setComments] = useState<Comment[]>([])
-  const [newComment, setNewComment] = useState("")
-  const [dragActive, setDragActive] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
+    e.preventDefault();
+    e.stopPropagation();
     if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true)
+      setDragActive(true);
     } else if (e.type === "dragleave") {
-      setDragActive(false)
+      setDragActive(false);
     }
-  }, [])
+  }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(false)
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      console.log("[drop] Files dropped:", e.dataTransfer.files)
-      handleFiles(e.dataTransfer.files)
+      console.log("[drop] Files dropped:", e.dataTransfer.files);
+      handleFiles(e.dataTransfer.files);
     }
-  }, [])
+  }, []);
 
   const handleFiles = async (files: FileList) => {
-    const file = files[0]
+    const file = files[0];
     if (!file) {
-      console.warn("[file] No file found")
-      return
+      console.warn("[file] No file found");
+      return;
     }
 
-    console.log("[file] Selected file:", file.name, "Size:", file.size)
+    console.log("[file] Selected file:", file.name, "Size:", file.size);
 
-    const text = await file.text()
-    const newComments: Comment[] = []
+    const text = await file.text();
+    const newComments: Comment[] = [];
 
     if (file.name.endsWith(".csv")) {
-      console.log("[file] Processing as CSV")
-      const lines = text.split("\n")
-      const header = lines[0]?.toLowerCase() || ""
-      const headerCols = header.split(",").map((col) => col.trim().replace(/"/g, ""))
-      let commentColIndex = 0
+      console.log("[file] Processing as CSV");
+      const lines = text.split("\n");
+      const header = lines[0]?.toLowerCase() || "";
+      const headerCols = header
+        .split(",")
+        .map((col) => col.trim().replace(/"/g, ""));
+      let commentColIndex = 0;
 
-      const commentKeywords = ["comment", "feedback", "text", "message", "review", "response"]
+      const commentKeywords = [
+        "comment",
+        "feedback",
+        "text",
+        "message",
+        "review",
+        "response",
+      ];
       for (let i = 0; i < headerCols.length; i++) {
-        if (commentKeywords.some((keyword) => headerCols[i].includes(keyword))) {
-          commentColIndex = i
-          break
+        if (
+          commentKeywords.some((keyword) => headerCols[i].includes(keyword))
+        ) {
+          commentColIndex = i;
+          break;
         }
       }
 
-      console.log("[file] Using column index:", commentColIndex, "Header:", headerCols[commentColIndex])
+      console.log(
+        "[file] Using column index:",
+        commentColIndex,
+        "Header:",
+        headerCols[commentColIndex]
+      );
 
       lines.forEach((line, index) => {
         if (line.trim() && index > 0) {
-          const cols = []
-          let current = ""
-          let inQuotes = false
+          const cols = [];
+          let current = "";
+          let inQuotes = false;
 
           for (let i = 0; i < line.length; i++) {
-            const char = line[i]
+            const char = line[i];
             if (char === '"') {
-              inQuotes = !inQuotes
+              inQuotes = !inQuotes;
             } else if (char === "," && !inQuotes) {
-              cols.push(current.trim())
-              current = ""
+              cols.push(current.trim());
+              current = "";
             } else {
-              current += char
+              current += char;
             }
           }
-          cols.push(current.trim())
+          cols.push(current.trim());
 
-          const comment = cols[commentColIndex]?.replace(/^"|"$/g, "").trim()
+          const comment = cols[commentColIndex]?.replace(/^"|"$/g, "").trim();
           if (comment) {
             newComments.push({
               id: `file-${Date.now()}-${index}`,
               text: comment,
               source: file.name,
-            })
+            });
           }
         }
-      })
+      });
     } else {
-      console.log("[file] Processing as plain text")
-      const lines = text.split("\n")
+      console.log("[file] Processing as plain text");
+      const lines = text.split("\n");
       lines.forEach((line, index) => {
         if (line.trim()) {
           newComments.push({
             id: `file-${Date.now()}-${index}`,
             text: line.trim(),
             source: file.name,
-          })
+          });
         }
-      })
+      });
     }
 
-    console.log("[file] Loaded comments:", newComments.length)
-    const updatedComments = [...comments, ...newComments]
-    setComments(updatedComments)
-    onCommentsChange(updatedComments)
-  }
+    console.log("[file] Loaded comments:", newComments.length);
+    const updatedComments = [...comments, ...newComments];
+    setComments(updatedComments);
+    onCommentsChange(updatedComments);
+  };
 
   const addComment = () => {
     if (newComment.trim()) {
       const comment: Comment = {
         id: `manual-${Date.now()}`,
         text: newComment.trim(),
-      }
-      const updatedComments = [...comments, comment]
-      setComments(updatedComments)
-      onCommentsChange(updatedComments)
-      setNewComment("")
+      };
+      const updatedComments = [...comments, comment];
+      setComments(updatedComments);
+      onCommentsChange(updatedComments);
+      setNewComment("");
     }
-  }
+  };
 
   const removeComment = (id: string) => {
-    const updatedComments = comments.filter((c) => c.id !== id)
-    setComments(updatedComments)
-    onCommentsChange(updatedComments)
-  }
+    const updatedComments = comments.filter((c) => c.id !== id);
+    setComments(updatedComments);
+    onCommentsChange(updatedComments);
+  };
 
   const clearAll = () => {
-    console.log("[action] Clearing all comments")
-    setComments([])
-    onCommentsChange([])
-  }
+    console.log("[action] Clearing all comments");
+    setComments([]);
+    onCommentsChange([]);
+  };
 
   return (
     <div className="space-y-6">
@@ -155,12 +176,16 @@ export function CommentInput({ onCommentsChange }: CommentInputProps) {
       <Card>
         <CardHeader>
           <CardTitle>Upload Comments Data</CardTitle>
-          <CardDescription>Upload CSV, text files, or paste comments directly</CardDescription>
+          <CardDescription>
+            Upload CSV, text files, or paste comments directly
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div
             className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-              dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400"
+              dragActive
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-300 hover:border-gray-400"
             }`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
@@ -168,8 +193,12 @@ export function CommentInput({ onCommentsChange }: CommentInputProps) {
             onDrop={handleDrop}
           >
             <div className="text-4xl mb-4">📁</div>
-            <h3 className="text-lg font-semibold mb-2">Drop files here or click to upload</h3>
-            <p className="text-gray-600 mb-4">Supports CSV and text files up to 10MB</p>
+            <h3 className="text-lg font-semibold mb-2">
+              Drop files here or click to upload
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Supports CSV and text files up to 10MB
+            </p>
 
             {/* Hidden Native File Input */}
             <input
@@ -177,11 +206,11 @@ export function CommentInput({ onCommentsChange }: CommentInputProps) {
               accept=".csv,.txt,.text"
               ref={fileInputRef}
               onChange={(e) => {
-                console.log("[input] File input changed")
+                console.log("[input] File input changed");
                 if (e.target.files) {
-                  handleFiles(e.target.files)
+                  handleFiles(e.target.files);
                 } else {
-                  console.warn("[input] No files found in input")
+                  console.warn("[input] No files found in input");
                 }
               }}
               style={{ display: "none" }}
@@ -193,8 +222,8 @@ export function CommentInput({ onCommentsChange }: CommentInputProps) {
               variant="outline"
               className="cursor-pointer bg-transparent"
               onClick={() => {
-                console.log("[button] Triggering file input click")
-                fileInputRef.current?.click()
+                console.log("[button] Triggering file input click");
+                fileInputRef.current?.click();
               }}
             >
               Choose Files
@@ -234,7 +263,9 @@ export function CommentInput({ onCommentsChange }: CommentInputProps) {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle>Loaded Comments ({comments.length})</CardTitle>
-                <CardDescription>Comments ready for sentiment analysis</CardDescription>
+                <CardDescription>
+                  Comments ready for sentiment analysis
+                </CardDescription>
               </div>
               <Button variant="outline" size="sm" onClick={clearAll}>
                 Clear All
@@ -244,7 +275,10 @@ export function CommentInput({ onCommentsChange }: CommentInputProps) {
           <CardContent>
             <div className="space-y-3 max-h-96 overflow-y-auto">
               {comments.map((comment) => (
-                <div key={comment.id} className="flex items-start gap-3 p-3 border rounded-lg bg-gray-50">
+                <div
+                  key={comment.id}
+                  className="flex items-start gap-3 p-3 border rounded-lg bg-gray-50"
+                >
                   <span className="text-lg mt-1">📄</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm break-words">{comment.text}</p>
@@ -254,7 +288,12 @@ export function CommentInput({ onCommentsChange }: CommentInputProps) {
                       </Badge>
                     )}
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => removeComment(comment.id)} className="flex-shrink-0">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeComment(comment.id)}
+                    className="flex-shrink-0"
+                  >
                     <span>❌</span>
                   </Button>
                 </div>
@@ -264,5 +303,5 @@ export function CommentInput({ onCommentsChange }: CommentInputProps) {
         </Card>
       )}
     </div>
-  )
+  );
 }

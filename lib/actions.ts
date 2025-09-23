@@ -6,9 +6,9 @@ import { z } from "zod";
 import Sentiment from "sentiment";
 
 interface SentimentResult {
-  score: number; // -1 to 1 (negative to positive)
+  score: number;
   label: "positive" | "negative" | "neutral";
-  confidence: number; // 0 to 1
+  confidence: number;
 }
 
 interface AnalysisResult {
@@ -17,7 +17,6 @@ interface AnalysisResult {
   wordCount: number;
 }
 
-// Schema for OpenAI response
 const sentimentSchema = z.object({
   sentiment: z.object({
     label: z.enum(["positive", "negative", "neutral"]),
@@ -69,7 +68,6 @@ function fallbackAnalysis(text: string): AnalysisResult {
   const words = text.toLowerCase().split(/\s+/);
   const wordCount = words.length;
 
-  // Extract meaningful keywords (filter out common stop words)
   const stopWords = new Set([
     "the",
     "a",
@@ -128,7 +126,6 @@ function fallbackAnalysis(text: string): AnalysisResult {
     .filter((word, index, arr) => arr.indexOf(word) === index)
     .slice(0, 10);
 
-  // Convert sentiment score to our scale and determine label
   const normalizedScore = Math.max(-1, Math.min(1, result.score / 5)); // Normalize to -1 to 1
   let label: "positive" | "negative" | "neutral";
 
@@ -140,7 +137,7 @@ function fallbackAnalysis(text: string): AnalysisResult {
     label = "neutral";
   }
 
-  const confidence = Math.min(0.9, Math.abs(normalizedScore) + 0.3); // Base confidence with sentiment strength
+  const confidence = Math.min(0.9, Math.abs(normalizedScore) + 0.3);
 
   return {
     sentiment: {
@@ -164,7 +161,6 @@ export async function analyzeBatchCommentsAction(
     }))
   );
 
-  // Calculate overall statistics
   const totalComments = results.length;
   const positiveCount = results.filter(
     (r) => r.analysis.sentiment.label === "positive"
@@ -176,7 +172,6 @@ export async function analyzeBatchCommentsAction(
     (r) => r.analysis.sentiment.label === "neutral"
   ).length;
 
-  // Aggregate keywords
   const allKeywords: { [key: string]: number } = {};
   results.forEach((result) => {
     result.analysis.keywords.forEach((keyword) => {

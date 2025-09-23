@@ -1,28 +1,37 @@
-"use client"
+"use client";
 
-import { useEffect, useRef, useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useEffect, useRef, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 interface WordCloudProps {
-  keywords: Array<{ word: string; count: number }>
-  width?: number
-  height?: number
+  keywords: Array<{ word: string; count: number }>;
+  width?: number;
+  height?: number;
 }
 
 interface WordPosition {
-  word: string
-  count: number
-  x: number
-  y: number
-  fontSize: number
-  color: string
+  word: string;
+  count: number;
+  x: number;
+  y: number;
+  fontSize: number;
+  color: string;
 }
 
-export function WordCloud({ keywords, width = 600, height = 400 }: WordCloudProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [wordPositions, setWordPositions] = useState<WordPosition[]>([])
+export function WordCloud({
+  keywords,
+  width = 600,
+  height = 400,
+}: WordCloudProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [wordPositions, setWordPositions] = useState<WordPosition[]>([]);
 
-  // Color palette for words
   const colors = [
     "#3b82f6", // blue
     "#10b981", // emerald
@@ -34,52 +43,52 @@ export function WordCloud({ keywords, width = 600, height = 400 }: WordCloudProp
     "#f97316", // orange
     "#ec4899", // pink
     "#6b7280", // gray
-  ]
+  ];
 
   useEffect(() => {
-    if (!keywords.length) return
+    if (!keywords.length) return;
 
-    const canvas = canvasRef.current
-    if (!canvas) return
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-    // Set canvas size
-    canvas.width = width
-    canvas.height = height
+    canvas.width = width;
+    canvas.height = height;
 
-    // Clear canvas
-    ctx.clearRect(0, 0, width, height)
+    ctx.clearRect(0, 0, width, height);
 
-    // Calculate font sizes based on word frequency
-    const maxCount = Math.max(...keywords.map((k) => k.count))
-    const minCount = Math.min(...keywords.map((k) => k.count))
-    const maxFontSize = 48
-    const minFontSize = 14
+    const maxCount = Math.max(...keywords.map((k) => k.count));
+    const minCount = Math.min(...keywords.map((k) => k.count));
+    const maxFontSize = 48;
+    const minFontSize = 14;
 
-    // Generate word positions with collision detection
-    const positions: WordPosition[] = []
-    const attempts = 50 // Maximum attempts to place each word
+    const positions: WordPosition[] = [];
+    const attempts = 50;
 
     keywords.forEach((keyword, index) => {
-      const fontSize = minFontSize + ((keyword.count - minCount) / (maxCount - minCount)) * (maxFontSize - minFontSize)
-      const color = colors[index % colors.length]
+      const fontSize =
+        minFontSize +
+        ((keyword.count - minCount) / (maxCount - minCount)) *
+          (maxFontSize - minFontSize);
+      const color = colors[index % colors.length];
 
-      // Try to find a position without collision
-      let placed = false
-      let attempt = 0
+      let placed = false;
+      let attempt = 0;
 
       while (!placed && attempt < attempts) {
-        const x = Math.random() * (width - fontSize * keyword.word.length * 0.6)
-        const y = fontSize + Math.random() * (height - fontSize * 2)
+        const x =
+          Math.random() * (width - fontSize * keyword.word.length * 0.6);
+        const y = fontSize + Math.random() * (height - fontSize * 2);
 
-        // Simple collision detection
         const hasCollision = positions.some((pos) => {
-          const distance = Math.sqrt(Math.pow(x - pos.x, 2) + Math.pow(y - pos.y, 2))
-          const minDistance = (fontSize + pos.fontSize) * 0.8
-          return distance < minDistance
-        })
+          const distance = Math.sqrt(
+            Math.pow(x - pos.x, 2) + Math.pow(y - pos.y, 2)
+          );
+          const minDistance = (fontSize + pos.fontSize) * 0.8;
+          return distance < minDistance;
+        });
 
         if (!hasCollision || attempt === attempts - 1) {
           positions.push({
@@ -89,38 +98,38 @@ export function WordCloud({ keywords, width = 600, height = 400 }: WordCloudProp
             y,
             fontSize,
             color,
-          })
-          placed = true
+          });
+          placed = true;
         }
 
-        attempt++
+        attempt++;
       }
-    })
+    });
 
-    setWordPositions(positions)
+    setWordPositions(positions);
 
     // Draw words on canvas
     positions.forEach((pos) => {
-      ctx.font = `bold ${pos.fontSize}px Inter, sans-serif`
-      ctx.fillStyle = pos.color
-      ctx.textAlign = "left"
-      ctx.textBaseline = "middle"
+      ctx.font = `bold ${pos.fontSize}px Inter, sans-serif`;
+      ctx.fillStyle = pos.color;
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
 
       // Add subtle shadow
-      ctx.shadowColor = "rgba(0, 0, 0, 0.1)"
-      ctx.shadowBlur = 2
-      ctx.shadowOffsetX = 1
-      ctx.shadowOffsetY = 1
+      ctx.shadowColor = "rgba(0, 0, 0, 0.1)";
+      ctx.shadowBlur = 2;
+      ctx.shadowOffsetX = 1;
+      ctx.shadowOffsetY = 1;
 
-      ctx.fillText(pos.word, pos.x, pos.y)
+      ctx.fillText(pos.word, pos.x, pos.y);
 
       // Reset shadow
-      ctx.shadowColor = "transparent"
-      ctx.shadowBlur = 0
-      ctx.shadowOffsetX = 0
-      ctx.shadowOffsetY = 0
-    })
-  }, [keywords, width, height])
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+    });
+  }, [keywords, width, height]);
 
   if (!keywords.length) {
     return (
@@ -138,14 +147,16 @@ export function WordCloud({ keywords, width = 600, height = 400 }: WordCloudProp
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Word Cloud</CardTitle>
-        <CardDescription>Most frequently mentioned keywords ({keywords.length} unique words)</CardDescription>
+        <CardDescription>
+          Most frequently mentioned keywords ({keywords.length} unique words)
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="relative">
@@ -158,7 +169,10 @@ export function WordCloud({ keywords, width = 600, height = 400 }: WordCloudProp
           {/* Word frequency legend */}
           <div className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             {keywords.slice(0, 12).map((keyword, index) => (
-              <div key={keyword.word} className="flex items-center gap-2 text-sm">
+              <div
+                key={keyword.word}
+                className="flex items-center gap-2 text-sm"
+              >
                 <div
                   className="w-3 h-3 rounded-full flex-shrink-0"
                   style={{ backgroundColor: colors[index % colors.length] }}
@@ -171,5 +185,5 @@ export function WordCloud({ keywords, width = 600, height = 400 }: WordCloudProp
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

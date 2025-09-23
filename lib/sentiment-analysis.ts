@@ -3,9 +3,9 @@ import { removeStopwords, eng } from "stopword";
 import natural from "natural";
 
 interface SentimentResult {
-  score: number; // -1 to 1 (negative to positive)
+  score: number;
   label: "positive" | "negative" | "neutral";
-  confidence: number; // 0 to 1
+  confidence: number;
 }
 
 interface AnalysisResult {
@@ -19,34 +19,23 @@ const tokenizer = new natural.WordTokenizer();
 const TfIdf = natural.TfIdf;
 const tfidf = new TfIdf();
 
-/**
- * Analyze sentiment and extract keywords from a single text string.
- */
 export async function analyzeSentiment(text: string): Promise<AnalysisResult> {
-  // Sentiment analysis
   const result = sentimentAnalyzer.analyze(text);
 
-  // Tokenize text using natural (better than splitting by space)
   const tokens = tokenizer.tokenize(text.toLowerCase());
   const wordCount = tokens.length;
 
-  // Remove stopwords
   const cleanTokens = removeStopwords(tokens, eng).filter((w) => w.length > 2);
 
-  // Use TF-IDF for keyword extraction (build doc then extract top terms)
   tfidf.addDocument(cleanTokens);
 
-  // Get top 10 keywords by TF-IDF score for this single document
-  // The tfidf.listTerms(docIndex) returns [{term, tfidf}, ...] sorted descending
   const keywords = tfidf
     .listTerms(0)
     .slice(0, 10)
     .map((item) => item.term);
 
-  // Normalize sentiment score from -5 to 5 scale to -1 to 1
   const normalizedScore = Math.max(-1, Math.min(1, result.score / 5));
 
-  // Determine sentiment label
   let label: "positive" | "negative" | "neutral";
   if (normalizedScore > 0.1) {
     label = "positive";
@@ -58,7 +47,6 @@ export async function analyzeSentiment(text: string): Promise<AnalysisResult> {
 
   const confidence = Math.min(0.9, Math.abs(normalizedScore) + 0.3);
 
-  // Clear tfidf documents for next call to avoid accumulation
   tfidf.documents = [];
 
   return {
@@ -72,9 +60,6 @@ export async function analyzeSentiment(text: string): Promise<AnalysisResult> {
   };
 }
 
-/**
- * Analyze an array of comments with sentiment and keyword aggregation.
- */
 export async function analyzeBatchComments(
   comments: Array<{ id: string; text: string }>
 ) {
@@ -97,7 +82,6 @@ export async function analyzeBatchComments(
     (r) => r.analysis.sentiment.label === "neutral"
   ).length;
 
-  // Aggregate keywords frequency
   const allKeywords: { [key: string]: number } = {};
   results.forEach((result) => {
     result.analysis.keywords.forEach((keyword) => {

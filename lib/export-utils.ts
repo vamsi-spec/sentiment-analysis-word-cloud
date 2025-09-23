@@ -1,17 +1,14 @@
-// Export utilities for generating reports in various formats
-
-import { generateSummary } from "./summary-generator"
+import { generateSummary } from "./summary-generator";
 
 interface ExportData {
-  analysisResults: any
-  comments: Array<{ id: string; text: string; source?: string }>
-  timestamp: string
+  analysisResults: any;
+  comments: Array<{ id: string; text: string; source?: string }>;
+  timestamp: string;
 }
 
 export function exportToCSV(data: ExportData): string {
-  const { analysisResults } = data
+  const { analysisResults } = data;
 
-  // Create CSV header
   const headers = [
     "Comment ID",
     "Comment Text",
@@ -21,9 +18,8 @@ export function exportToCSV(data: ExportData): string {
     "Confidence",
     "Word Count",
     "Top Keywords",
-  ]
+  ];
 
-  // Create CSV rows
   const rows = analysisResults.results.map((result: any) => [
     result.id,
     `"${result.text.replace(/"/g, '""')}"`, // Escape quotes
@@ -33,20 +29,19 @@ export function exportToCSV(data: ExportData): string {
     result.analysis.sentiment.confidence.toFixed(3),
     result.analysis.wordCount,
     `"${result.analysis.keywords.slice(0, 5).join(", ")}"`,
-  ])
+  ]);
 
-  // Combine headers and rows
-  const csvContent = [headers, ...rows].map((row) => row.join(",")).join("\n")
+  const csvContent = [headers, ...rows].map((row) => row.join(",")).join("\n");
 
-  return csvContent
+  return csvContent;
 }
 
 export function exportToJSON(data: ExportData): string {
   const summary = generateSummary(
     data.analysisResults.results,
     data.analysisResults.summary,
-    data.analysisResults.keywords,
-  )
+    data.analysisResults.keywords
+  );
 
   const exportObject = {
     metadata: {
@@ -73,14 +68,18 @@ export function exportToJSON(data: ExportData): string {
       keywords: result.analysis.keywords,
       wordCount: result.analysis.wordCount,
     })),
-  }
+  };
 
-  return JSON.stringify(exportObject, null, 2)
+  return JSON.stringify(exportObject, null, 2);
 }
 
 export function exportToMarkdown(data: ExportData): string {
-  const { analysisResults } = data
-  const summary = generateSummary(analysisResults.results, analysisResults.summary, analysisResults.keywords)
+  const { analysisResults } = data;
+  const summary = generateSummary(
+    analysisResults.results,
+    analysisResults.summary,
+    analysisResults.keywords
+  );
 
   const markdown = `# E-Consultation Sentiment Analysis Report
 
@@ -93,10 +92,18 @@ ${summary.executiveSummary}
 
 ## Key Statistics
 
-- **Positive Sentiment:** ${analysisResults.summary.positivePercentage}% (${analysisResults.summary.positive} comments)
-- **Negative Sentiment:** ${analysisResults.summary.negativePercentage}% (${analysisResults.summary.negative} comments)
-- **Neutral Sentiment:** ${analysisResults.summary.neutralPercentage}% (${analysisResults.summary.neutral} comments)
-- **Average Sentiment Score:** ${analysisResults.summary.averageScore.toFixed(3)}
+- **Positive Sentiment:** ${analysisResults.summary.positivePercentage}% (${
+    analysisResults.summary.positive
+  } comments)
+- **Negative Sentiment:** ${analysisResults.summary.negativePercentage}% (${
+    analysisResults.summary.negative
+  } comments)
+- **Neutral Sentiment:** ${analysisResults.summary.neutralPercentage}% (${
+    analysisResults.summary.neutral
+  } comments)
+- **Average Sentiment Score:** ${analysisResults.summary.averageScore.toFixed(
+    3
+  )}
 
 ## Key Findings
 
@@ -110,7 +117,10 @@ ${summary.sentimentOverview}
 
 ${analysisResults.keywords
   .slice(0, 15)
-  .map((keyword: any, index: number) => `${index + 1}. **${keyword.word}** (${keyword.count} mentions)`)
+  .map(
+    (keyword: any, index: number) =>
+      `${index + 1}. **${keyword.word}** (${keyword.count} mentions)`
+  )
   .join("\n")}
 
 ## Key Concerns
@@ -128,28 +138,32 @@ ${summary.methodology}
 ---
 
 *This report was generated using automated sentiment analysis. Results should be reviewed in conjunction with qualitative analysis of individual comments.*
-`
+`;
 
-  return markdown
+  return markdown;
 }
 
-export function downloadFile(content: string, filename: string, mimeType: string) {
-  const blob = new Blob([content], { type: mimeType })
-  const url = URL.createObjectURL(blob)
+export function downloadFile(
+  content: string,
+  filename: string,
+  mimeType: string
+) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
 
-  const link = document.createElement("a")
-  link.href = url
-  link.download = filename
-  link.style.display = "none"
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.style.display = "none";
 
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 
-  URL.revokeObjectURL(url)
+  URL.revokeObjectURL(url);
 }
 
 export function generateFilename(format: string): string {
-  const timestamp = new Date().toISOString().split("T")[0]
-  return `sentiment-analysis-report-${timestamp}.${format}`
+  const timestamp = new Date().toISOString().split("T")[0];
+  return `sentiment-analysis-report-${timestamp}.${format}`;
 }

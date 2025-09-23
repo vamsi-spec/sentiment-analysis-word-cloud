@@ -1,12 +1,17 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-// import { FileText, TrendingUp, AlertTriangle, Lightbulb, BarChart3 } from 'lucide-react'
-import { generateSummary } from "@/lib/summary-generator"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { generateSummary } from "@/lib/summary-generator";
 
 interface SummaryReportProps {
-  analysisResults: any
+  analysisResults: any;
 }
 
 export function SummaryReport({ analysisResults }: SummaryReportProps) {
@@ -25,10 +30,14 @@ export function SummaryReport({ analysisResults }: SummaryReportProps) {
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
-  const summary = generateSummary(analysisResults.results, analysisResults.summary, analysisResults.keywords)
+  const summary = generateSummary(
+    analysisResults.results,
+    analysisResults.summary,
+    analysisResults.keywords
+  );
 
   return (
     <div className="space-y-6">
@@ -39,10 +48,14 @@ export function SummaryReport({ analysisResults }: SummaryReportProps) {
             <span className="text-xl text-blue-600">📄</span>
             <CardTitle>Executive Summary</CardTitle>
           </div>
-          <CardDescription>High-level overview of public consultation results</CardDescription>
+          <CardDescription>
+            High-level overview of public consultation results
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-foreground leading-relaxed">{summary.executiveSummary}</p>
+          <p className="text-foreground leading-relaxed">
+            {summary.executiveSummary}
+          </p>
         </CardContent>
       </Card>
 
@@ -53,7 +66,9 @@ export function SummaryReport({ analysisResults }: SummaryReportProps) {
             <span className="text-xl text-green-600">📈</span>
             <CardTitle>Key Findings</CardTitle>
           </div>
-          <CardDescription>Primary insights from the sentiment analysis</CardDescription>
+          <CardDescription>
+            Primary insights from the sentiment analysis
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <ul className="space-y-3">
@@ -74,22 +89,32 @@ export function SummaryReport({ analysisResults }: SummaryReportProps) {
             <span className="text-xl text-purple-600">📊</span>
             <CardTitle>Sentiment Overview</CardTitle>
           </div>
-          <CardDescription>Detailed breakdown of public sentiment patterns</CardDescription>
+          <CardDescription>
+            Detailed breakdown of public sentiment patterns
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-foreground leading-relaxed mb-4">{summary.sentimentOverview}</p>
+          <p className="text-foreground leading-relaxed mb-4">
+            {summary.sentimentOverview}
+          </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="text-center p-3 bg-green-50 rounded-lg border border-green-200">
-              <div className="text-lg font-semibold text-green-700">{analysisResults.summary.positivePercentage}%</div>
+              <div className="text-lg font-semibold text-green-700">
+                {analysisResults.summary.positivePercentage}%
+              </div>
               <div className="text-sm text-green-600">Positive</div>
             </div>
             <div className="text-center p-3 bg-red-50 rounded-lg border border-red-200">
-              <div className="text-lg font-semibold text-red-700">{analysisResults.summary.negativePercentage}%</div>
+              <div className="text-lg font-semibold text-red-700">
+                {analysisResults.summary.negativePercentage}%
+              </div>
               <div className="text-sm text-red-600">Negative</div>
             </div>
             <div className="text-center p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-              <div className="text-lg font-semibold text-yellow-700">{analysisResults.summary.neutralPercentage}%</div>
+              <div className="text-lg font-semibold text-yellow-700">
+                {analysisResults.summary.neutralPercentage}%
+              </div>
               <div className="text-sm text-yellow-600">Neutral</div>
             </div>
           </div>
@@ -103,7 +128,9 @@ export function SummaryReport({ analysisResults }: SummaryReportProps) {
             <span className="text-xl text-orange-600">⚠️</span>
             <CardTitle>Key Concerns</CardTitle>
           </div>
-          <CardDescription>Primary issues and concerns raised by respondents</CardDescription>
+          <CardDescription>
+            Primary issues and concerns raised by respondents
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <ul className="space-y-3">
@@ -124,7 +151,9 @@ export function SummaryReport({ analysisResults }: SummaryReportProps) {
             <span className="text-xl text-yellow-600">💡</span>
             <CardTitle>Recommendations</CardTitle>
           </div>
-          <CardDescription>Strategic recommendations based on analysis results</CardDescription>
+          <CardDescription>
+            Strategic recommendations based on analysis results
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <ul className="space-y-3">
@@ -142,33 +171,45 @@ export function SummaryReport({ analysisResults }: SummaryReportProps) {
       <Card>
         <CardHeader>
           <CardTitle>Methodology</CardTitle>
-          <CardDescription>Analysis approach and technical details</CardDescription>
+          <CardDescription>
+            Analysis approach and technical details
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground text-sm leading-relaxed">{summary.methodology}</p>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            {summary.methodology}
+          </p>
 
           <Separator className="my-4" />
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
               <div className="font-medium text-foreground">Total Comments</div>
-              <div className="text-muted-foreground">{analysisResults.summary.total}</div>
+              <div className="text-muted-foreground">
+                {analysisResults.summary.total}
+              </div>
             </div>
             <div>
               <div className="font-medium text-foreground">Unique Keywords</div>
-              <div className="text-muted-foreground">{analysisResults.keywords.length}</div>
+              <div className="text-muted-foreground">
+                {analysisResults.keywords.length}
+              </div>
             </div>
             <div>
               <div className="font-medium text-foreground">Avg. Sentiment</div>
-              <div className="text-muted-foreground">{analysisResults.summary.averageScore.toFixed(3)}</div>
+              <div className="text-muted-foreground">
+                {analysisResults.summary.averageScore.toFixed(3)}
+              </div>
             </div>
             <div>
               <div className="font-medium text-foreground">Analysis Date</div>
-              <div className="text-muted-foreground">{new Date().toLocaleDateString()}</div>
+              <div className="text-muted-foreground">
+                {new Date().toLocaleDateString()}
+              </div>
             </div>
           </div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
