@@ -1,6 +1,6 @@
-import type * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cn } from "@/lib/utils";
 
 const buttonVariants = {
   variant: {
@@ -17,31 +17,46 @@ const buttonVariants = {
     lg: "h-10 px-6 py-2.5",
     icon: "h-9 w-9",
   },
+};
+
+interface ButtonProps extends React.ComponentPropsWithoutRef<"button"> {
+  variant?: keyof typeof buttonVariants.variant;
+  size?: keyof typeof buttonVariants.size;
+  asChild?: boolean;
 }
 
-interface ButtonProps extends React.ComponentProps<"button"> {
-  variant?: keyof typeof buttonVariants.variant
-  size?: keyof typeof buttonVariants.size
-  asChild?: boolean
-}
+// ✅ Wrap in React.forwardRef and pass ref down
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (
+    {
+      className,
+      variant = "default",
+      size = "default",
+      asChild = false,
+      ...props
+    },
+    ref
+  ) => {
+    const Comp = asChild ? Slot : "button";
 
-function Button({ className, variant = "default", size = "default", asChild = false, ...props }: ButtonProps) {
-  const Comp = asChild ? Slot : "button"
+    const variantClasses = buttonVariants.variant[variant];
+    const sizeClasses = buttonVariants.size[size];
 
-  const variantClasses = buttonVariants.variant[variant]
-  const sizeClasses = buttonVariants.size[size]
+    return (
+      <Comp
+        ref={ref}
+        className={cn(
+          "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
+          variantClasses,
+          sizeClasses,
+          className
+        )}
+        {...props}
+      />
+    );
+  }
+);
 
-  return (
-    <Comp
-      className={cn(
-        "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
-        variantClasses,
-        sizeClasses,
-        className,
-      )}
-      {...props}
-    />
-  )
-}
+Button.displayName = "Button";
 
-export { Button }
+export { Button };
